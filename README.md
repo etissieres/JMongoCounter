@@ -1,4 +1,3 @@
-JMongoCounter
-=============
+# JMongoCounter
 
 Mongo counter
