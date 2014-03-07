@@ -1,0 +1,4 @@
+JMongoCounter
+=============
+
+Mongo counter
