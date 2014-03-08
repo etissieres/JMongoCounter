@@ -2,26 +2,33 @@ package org.mansart.mongocount;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.renderer.xy.XYSplineRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.ExtensionFileFilter;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 public final class Window extends JPanel implements Counter.Listener {
     private Counter counter;
     private XYSeries data = null;
 
     private JFreeChart chart = null;
+    private ChartPanel chartPanel = null;
     private JTextField dbnameField = new JTextField();
     private JTextField collnameField = new JTextField();
     private JSpinner intervalField = new JSpinner();
-    private JButton configureButton = new JButton("Refresh");
+    private JButton startButton = new JButton("Refresh");
+    private JButton stopButton = new JButton("Freeze");
+    private JButton saveButton = new JButton("Save");
     private JButton quitButton = new JButton("Quit");
 
     public Window(Counter counter) {
@@ -59,15 +66,18 @@ public final class Window extends JPanel implements Counter.Listener {
         controlsPanel.add(this.collnameField);
         controlsPanel.add(new JLabel("Interval"));
         controlsPanel.add(this.intervalField);
-        controlsPanel.add(this.configureButton);
+        controlsPanel.add(this.startButton);
+        controlsPanel.add(this.stopButton);
+        controlsPanel.add(new JSeparator(SwingConstants.VERTICAL));
+        controlsPanel.add(this.saveButton);
         controlsPanel.add(new JSeparator(SwingConstants.VERTICAL));
         controlsPanel.add(this.quitButton);
 
-        ChartPanel chartPanel = new ChartPanel(this.chart);
-        chartPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
+        this.chartPanel = new ChartPanel(this.chart);
+        this.chartPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
 
         this.setLayout(new BorderLayout());
-        this.add(chartPanel, BorderLayout.CENTER);
+        this.add(this.chartPanel, BorderLayout.CENTER);
         this.add(controlsPanel, BorderLayout.SOUTH);
     }
 
@@ -83,14 +93,14 @@ public final class Window extends JPanel implements Counter.Listener {
             "Counts",
             dataset
         );
-        XYSplineRenderer renderer = new XYSplineRenderer();
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setBaseShapesVisible(false);
         renderer.setBaseSeriesVisibleInLegend(false);
-        chart.getXYPlot().setRenderer(renderer);
+        this.chart.getXYPlot().setRenderer(renderer);
     }
 
     public void setupListeners() {
-        this.configureButton.addActionListener(new ActionListener() {
+        this.startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String dbname = Window.this.dbnameField.getText();
@@ -99,7 +109,33 @@ public final class Window extends JPanel implements Counter.Listener {
                 Window.this.data.clear();
                 if (!dbname.isEmpty() && !collname.isEmpty() && interval > 0) {
                     Window.this.chart.setTitle(dbname + "." + collname);
-                    Window.this.counter.configure(dbname, collname, interval);
+                    Window.this.counter.start(dbname, collname, interval);
+                }
+            }
+        });
+
+        this.stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Window.this.counter.stop();
+            }
+        });
+
+        this.saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.addChoosableFileFilter(new ExtensionFileFilter("JPEG", ".jpg"));
+                int option = fileChooser.showSaveDialog(Window.this);
+                if (option == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    int width = Window.this.chartPanel.getWidth();
+                    int height = Window.this.chartPanel.getHeight();
+                    try {
+                        ChartUtilities.saveChartAsJPEG(file, Window.this.chart, width, height);
+                    } catch (IOException exception) {
+                        exception.printStackTrace();
+                    }
                 }
             }
         });

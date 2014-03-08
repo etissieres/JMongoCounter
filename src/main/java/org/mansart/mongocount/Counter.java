@@ -28,12 +28,16 @@ public final class Counter implements Runnable {
         if (this.client != null) this.client.close();
     }
 
-    public void configure(String dbname, String collname, int interval) {
+    public void start(String dbname, String collname, int interval) {
         this.dbname = dbname;
         this.collname = collname;
         this.interval = interval;
         this.thread = new Thread(this);
         this.thread.start();
+    }
+
+    public void stop() {
+        this.thread = null;
     }
 
     public void addListener(Listener listener) {
@@ -54,7 +58,7 @@ public final class Counter implements Runnable {
     public void run() {
         DB db = this.client.getDB(this.dbname);
         DBCollection coll = db.getCollection(this.collname);
-        while (Thread.currentThread().getId() == this.thread.getId()) {
+        while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
             long count = coll.count();
             this.notifyListeners(count);
             try {
