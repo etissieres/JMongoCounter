@@ -1,3 +1,3 @@
 # JMongoCounter
 
-Mongo counter
+![Interface](https://raw.github.com/etissieres/JMongoCounter/master/screenshots/interface.jpg)
