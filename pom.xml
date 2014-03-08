@@ -6,14 +6,14 @@
 
     <groupId>org.mansart</groupId>
     <artifactId>JMongoCounter</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <properties>
         <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
-        <java.version>1.7</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jfreechart.version>1.0.17</jfreechart.version>
         <mongo-java-driver.version>2.11.4</mongo-java-driver.version>
+        <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
     </properties>
 
     <dependencies>
@@ -28,4 +28,34 @@
             <version>${jfreechart.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.mansart.mongocount.Window</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
