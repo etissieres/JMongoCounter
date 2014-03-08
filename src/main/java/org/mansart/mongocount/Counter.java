@@ -9,34 +9,31 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public final class Counter implements Runnable {
-    private boolean running = false;
+    private ArrayList<Listener> listeners = new ArrayList<Listener>();
+    private MongoClient client = null;
     private String dbname;
     private String collname;
-    private MongoClient client = null;
-    private DB db = null;
-    private DBCollection coll = null;
-    private ArrayList<Listener> listeners = new ArrayList<Listener>();
-
-    public Counter(String dbname, String collname) {
-        super();
-        this.dbname = dbname;
-        this.collname = collname;
-    }
+    private int interval;
+    private Thread thread = null;
 
     public void connect() throws MongoException {
         try {
             this.client = new MongoClient("localhost");
-            this.db = client.getDB(this.dbname);
-            this.coll = db.getCollection(this.collname);
-            this.running = true;
         } catch (UnknownHostException e) {
             throw new MongoException("Unable to setup", e);
         }
     }
 
     public void disconnect() {
-        this.running = false;
         if (this.client != null) this.client.close();
+    }
+
+    public void configure(String dbname, String collname, int interval) {
+        this.dbname = dbname;
+        this.collname = collname;
+        this.interval = interval;
+        this.thread = new Thread(this);
+        this.thread.start();
     }
 
     public void addListener(Listener listener) {
@@ -55,11 +52,13 @@ public final class Counter implements Runnable {
 
     @Override
     public void run() {
-        while (this.running) {
-            long count = this.coll.count();
+        DB db = this.client.getDB(this.dbname);
+        DBCollection coll = db.getCollection(this.collname);
+        while (Thread.currentThread().getId() == this.thread.getId()) {
+            long count = coll.count();
             this.notifyListeners(count);
             try {
-                Thread.sleep(1000);
+                Thread.sleep(this.interval * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
