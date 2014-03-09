@@ -1,4 +1,4 @@
-package org.mansart.mongocount;
+package org.mansart.mongocount.gui;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -8,6 +8,8 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ExtensionFileFilter;
+import org.mansart.mongocount.Configuration;
+import org.mansart.mongocount.Counter;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -17,68 +19,34 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
-public final class Window extends JPanel implements Counter.Listener {
-    private Counter counter;
+public final class Window extends JPanel implements Configuration.Listener, Counter.Listener {
+    private Configuration configuration = null;
+    private Counter counter = null;
     private XYSeries data = null;
 
     private JFreeChart chart = null;
     private ChartPanel chartPanel = null;
-    private JTextField dbnameField = new JTextField();
-    private JTextField collnameField = new JTextField();
-    private JSpinner intervalField = new JSpinner();
-    private JButton startButton = new JButton("Refresh");
-    private JButton stopButton = new JButton("Freeze");
+    private JButton configurationButton = new JButton("Configure");
+    private JButton startButton = new JButton("Start");
+    private JButton stopButton = new JButton("Stop");
+    private JButton clearButton = new JButton("Clear");
     private JButton saveButton = new JButton("Save");
     private JButton quitButton = new JButton("Quit");
+    private JDialog configurationDialog = null;
 
-    public Window(Counter counter) {
+    public Window(Configuration configuration, Counter counter) {
         super();
 
+        this.configuration = configuration;
+        this.configuration.addListener(this);
         this.counter = counter;
         this.counter.addListener(this);
+
+        this.configurationDialog = new ConfigurationDialog(configuration, this);
 
         this.setupChart();
         this.setupGraphics();
         this.setupListeners();
-    }
-
-    @Override
-    public void onCount(final long count) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Window.this.data.add(Window.this.data.getItemCount(), count);
-            }
-        });
-    }
-
-    private void setupGraphics() {
-        this.intervalField.setValue(1);
-
-        JPanel controlsPanel = new JPanel();
-        controlsPanel.setBorder(BorderFactory.createCompoundBorder(
-            new EmptyBorder(5, 5, 5, 5),
-            new TitledBorder("Controls")));
-        controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.LINE_AXIS));
-        controlsPanel.add(new JLabel("Database"));
-        controlsPanel.add(this.dbnameField);
-        controlsPanel.add(new JLabel("Collection"));
-        controlsPanel.add(this.collnameField);
-        controlsPanel.add(new JLabel("Interval"));
-        controlsPanel.add(this.intervalField);
-        controlsPanel.add(this.startButton);
-        controlsPanel.add(this.stopButton);
-        controlsPanel.add(new JSeparator(SwingConstants.VERTICAL));
-        controlsPanel.add(this.saveButton);
-        controlsPanel.add(new JSeparator(SwingConstants.VERTICAL));
-        controlsPanel.add(this.quitButton);
-
-        this.chartPanel = new ChartPanel(this.chart);
-        this.chartPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
-
-        this.setLayout(new BorderLayout());
-        this.add(this.chartPanel, BorderLayout.CENTER);
-        this.add(controlsPanel, BorderLayout.SOUTH);
     }
 
     private void setupChart() {
@@ -99,18 +67,42 @@ public final class Window extends JPanel implements Counter.Listener {
         this.chart.getXYPlot().setRenderer(renderer);
     }
 
-    public void setupListeners() {
+    private void setupGraphics() {
+        JPanel controlsPanel = new JPanel();
+        controlsPanel.setBorder(BorderFactory.createCompoundBorder(
+            new EmptyBorder(5, 5, 5, 5),
+            new TitledBorder("Controls")));
+        controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.LINE_AXIS));
+        controlsPanel.add(this.configurationButton);
+        controlsPanel.add(Box.createHorizontalGlue());
+        controlsPanel.add(this.startButton);
+        controlsPanel.add(this.stopButton);
+        controlsPanel.add(this.clearButton);
+        controlsPanel.add(this.saveButton);
+        controlsPanel.add(Box.createHorizontalGlue());
+        controlsPanel.add(this.quitButton);
+
+        this.chartPanel = new ChartPanel(this.chart);
+        this.chartPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
+
+        this.setLayout(new BorderLayout());
+        this.add(this.chartPanel, BorderLayout.CENTER);
+        this.add(controlsPanel, BorderLayout.SOUTH);
+    }
+
+    private void setupListeners() {
+        this.configurationButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Window.this.configurationDialog.setLocationRelativeTo(Window.this);
+                Window.this.configurationDialog.setVisible(true);
+            }
+        });
+
         this.startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String dbname = Window.this.dbnameField.getText();
-                String collname = Window.this.collnameField.getText();
-                int interval = (Integer) Window.this.intervalField.getValue();
-                Window.this.data.clear();
-                if (!dbname.isEmpty() && !collname.isEmpty() && interval > 0) {
-                    Window.this.chart.setTitle(dbname + "." + collname);
-                    Window.this.counter.start(dbname, collname, interval);
-                }
+                Window.this.counter.start();
             }
         });
 
@@ -118,6 +110,13 @@ public final class Window extends JPanel implements Counter.Listener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Window.this.counter.stop();
+            }
+        });
+
+        this.clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Window.this.data.clear();
             }
         });
 
@@ -148,27 +147,25 @@ public final class Window extends JPanel implements Counter.Listener {
         });
     }
 
-    public static void main(String[] args) throws Exception {
-        final Counter counter = new Counter();
-        counter.connect();
-
-        try {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
+    @Override
+    public void onConfigurationUpdate() {
+        final String title = this.configuration.getDbname() + "." + this.configuration.getCollname();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Window.this.data.clear();
+                Window.this.chart.setTitle(title);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
+    }
 
-        Window window = new Window(counter);
-        JFrame frame = new JFrame("Mongo Counter");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setSize(900, 600);
-        frame.setContentPane(window);
-        frame.setVisible(true);
+    @Override
+    public void onCount(final long count) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Window.this.data.add(Window.this.data.getItemCount(), count);
+            }
+        });
     }
 }

@@ -8,13 +8,16 @@ import org.mansart.mongocount.exception.MongoException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-public final class Counter implements Runnable {
+public final class Counter implements Configuration.Listener, Runnable {
     private ArrayList<Listener> listeners = new ArrayList<Listener>();
     private MongoClient client = null;
-    private String dbname;
-    private String collname;
-    private int interval;
+    private Configuration configuration = null;
     private Thread thread = null;
+
+    public Counter(Configuration configuration) {
+        this.configuration = configuration;
+        this.configuration.addListener(this);
+    }
 
     public void connect() throws MongoException {
         try {
@@ -28,16 +31,24 @@ public final class Counter implements Runnable {
         if (this.client != null) this.client.close();
     }
 
-    public void start(String dbname, String collname, int interval) {
-        this.dbname = dbname;
-        this.collname = collname;
-        this.interval = interval;
-        this.thread = new Thread(this);
-        this.thread.start();
+    public void start() {
+        if (!this.configuration.getDbname().isEmpty() &&
+            !this.configuration.getCollname().isEmpty() &&
+            this.configuration.getInterval() > 0) {
+
+            this.thread = new Thread(this);
+            this.thread.start();
+        }
     }
 
     public void stop() {
         this.thread = null;
+    }
+
+    @Override
+    public void onConfigurationUpdate() {
+        this.stop();
+        this.start();
     }
 
     public void addListener(Listener listener) {
@@ -48,7 +59,7 @@ public final class Counter implements Runnable {
         this.listeners.remove(listener);
     }
 
-    public void notifyListeners(long count) {
+    private void notifyListeners(long count) {
         for (Listener listener : this.listeners) {
             listener.onCount(count);
         }
@@ -56,13 +67,13 @@ public final class Counter implements Runnable {
 
     @Override
     public void run() {
-        DB db = this.client.getDB(this.dbname);
-        DBCollection coll = db.getCollection(this.collname);
+        DB db = this.client.getDB(this.configuration.getDbname());
+        DBCollection coll = db.getCollection(this.configuration.getCollname());
         while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
             long count = coll.count();
             this.notifyListeners(count);
             try {
-                Thread.sleep(this.interval * 1000);
+                Thread.sleep(this.configuration.getInterval() * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -6,7 +6,7 @@
 
     <groupId>org.mansart</groupId>
     <artifactId>JMongoCounter</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 
     <properties>
         <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
@@ -42,7 +42,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
-                            <mainClass>org.mansart.mongocount.Window</mainClass>
+                            <mainClass>org.mansart.mongocount.Application</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
