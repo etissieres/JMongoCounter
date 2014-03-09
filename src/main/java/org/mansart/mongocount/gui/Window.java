@@ -27,8 +27,7 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
     private JFreeChart chart = null;
     private ChartPanel chartPanel = null;
     private JButton configurationButton = new JButton("Configure");
-    private JButton startButton = new JButton("Start");
-    private JButton stopButton = new JButton("Stop");
+    private JButton lifeButton = new JButton("Start");
     private JButton clearButton = new JButton("Clear");
     private JButton saveButton = new JButton("Save");
     private JButton quitButton = new JButton("Quit");
@@ -75,8 +74,7 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
         controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.LINE_AXIS));
         controlsPanel.add(this.configurationButton);
         controlsPanel.add(Box.createHorizontalGlue());
-        controlsPanel.add(this.startButton);
-        controlsPanel.add(this.stopButton);
+        controlsPanel.add(this.lifeButton);
         controlsPanel.add(this.clearButton);
         controlsPanel.add(this.saveButton);
         controlsPanel.add(Box.createHorizontalGlue());
@@ -99,17 +97,19 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
             }
         });
 
-        this.startButton.addActionListener(new ActionListener() {
+        this.lifeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Window.this.counter.start();
-            }
-        });
-
-        this.stopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Window.this.counter.stop();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (Window.this.counter.isStarted()) {
+                            Window.this.counter.stop();
+                        } else {
+                            Window.this.counter.start();
+                        }
+                    }
+                }).start(); // Must not be processed in EDT thread
             }
         });
 
@@ -155,6 +155,26 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
             public void run() {
                 Window.this.data.clear();
                 Window.this.chart.setTitle(title);
+            }
+        });
+    }
+
+    @Override
+    public void onCountStart() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Window.this.lifeButton.setText("Stop");
+            }
+        });
+    }
+
+    @Override
+    public void onCountStop() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Window.this.lifeButton.setText("Start");
             }
         });
     }

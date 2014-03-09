@@ -23,6 +23,7 @@ public final class Application {
             e.printStackTrace();
         }
 
+        // Must be processed in EDT thread
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

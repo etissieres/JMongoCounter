@@ -38,11 +38,17 @@ public final class Counter implements Configuration.Listener, Runnable {
 
             this.thread = new Thread(this);
             this.thread.start();
+            this.notifyListenersOfCountStart();
         }
     }
 
     public void stop() {
         this.thread = null;
+        this.notifyListenersOfCountStop();
+    }
+
+    public boolean isStarted() {
+        return this.thread != null && this.thread.isAlive();
     }
 
     @Override
@@ -59,7 +65,19 @@ public final class Counter implements Configuration.Listener, Runnable {
         this.listeners.remove(listener);
     }
 
-    private void notifyListeners(long count) {
+    private void notifyListenersOfCountStart() {
+        for (Listener listener : this.listeners) {
+            listener.onCountStart();
+        }
+    }
+
+    private void notifyListenersOfCountStop() {
+        for (Listener listener : this.listeners) {
+            listener.onCountStop();
+        }
+    }
+
+    private void notifyListenersOfCount(long count) {
         for (Listener listener : this.listeners) {
             listener.onCount(count);
         }
@@ -71,7 +89,7 @@ public final class Counter implements Configuration.Listener, Runnable {
         DBCollection coll = db.getCollection(this.configuration.getCollname());
         while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
             long count = coll.count();
-            this.notifyListeners(count);
+            this.notifyListenersOfCount(count);
             try {
                 Thread.sleep(this.configuration.getInterval() * 1000);
             } catch (InterruptedException e) {
@@ -81,6 +99,8 @@ public final class Counter implements Configuration.Listener, Runnable {
     }
 
     public static interface Listener {
+        public void onCountStart();
+        public void onCountStop();
         public void onCount(long count);
     }
 }
