@@ -11,7 +11,6 @@ public final class Application {
     public static void main(String[] args) throws Exception {
         final Configuration configuration = new Configuration();
         final Counter counter = new Counter(configuration);
-        counter.connect();
 
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {

@@ -6,14 +6,16 @@
 
     <groupId>org.mansart</groupId>
     <artifactId>JMongoCounter</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 
     <properties>
-        <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jfreechart.version>1.0.17</jfreechart.version>
         <mongo-java-driver.version>2.11.4</mongo-java-driver.version>
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
+        <java.source.version>1.7</java.source.version>
+        <java.target.version>1.7</java.target.version>
     </properties>
 
     <dependencies>
@@ -31,6 +33,15 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${java.source.version}</source>
+                    <target>${java.target.version}</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>

@@ -191,4 +191,17 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
             }
         });
     }
+
+    @Override
+    public void onCountError() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JOptionPane.showMessageDialog(Window.this,
+                    "An error occured while counting : " + Window.this.configuration,
+                    "Processing error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
 }

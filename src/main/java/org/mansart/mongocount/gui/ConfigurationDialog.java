@@ -21,10 +21,12 @@ public final class ConfigurationDialog extends JDialog {
     };
 
     private Configuration configuration = null;
+    private JTextField hostField = new JTextField();
+    private JSpinner portField = new JSpinner();
     private JTextField dbnameField = new JTextField();
     private JTextField collnameField = new JTextField();
     private JSpinner intervalField = new JSpinner();
-    private JComboBox<Color> colorField = new JComboBox<Color>(COLORS);
+    private JComboBox<Color> colorField = new JComboBox<>(COLORS);
     private JButton cancelButton = new JButton("Cancel");
     private JButton okButton = new JButton("OK");
 
@@ -41,6 +43,8 @@ public final class ConfigurationDialog extends JDialog {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {
+                ConfigurationDialog.this.hostField.setText(ConfigurationDialog.this.configuration.getHost());
+                ConfigurationDialog.this.portField.setValue(ConfigurationDialog.this.configuration.getPort());
                 ConfigurationDialog.this.dbnameField.setText(ConfigurationDialog.this.configuration.getDbname());
                 ConfigurationDialog.this.collnameField.setText(ConfigurationDialog.this.configuration.getCollname());
                 ConfigurationDialog.this.intervalField.setValue(ConfigurationDialog.this.configuration.getInterval());
@@ -58,11 +62,13 @@ public final class ConfigurationDialog extends JDialog {
         this.okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String host = ConfigurationDialog.this.hostField.getText();
+                int port = (Integer) ConfigurationDialog.this.portField.getValue();
                 String dbname = ConfigurationDialog.this.dbnameField.getText();
                 String collname = ConfigurationDialog.this.collnameField.getText();
                 int interval = (Integer) ConfigurationDialog.this.intervalField.getValue();
                 Color color = (Color) ConfigurationDialog.this.colorField.getSelectedItem();
-                ConfigurationDialog.this.configuration.udpate(dbname, collname, interval, color);
+                ConfigurationDialog.this.configuration.udpate(host, port, dbname, collname, interval, color);
                 ConfigurationDialog.this.setVisible(false);
             }
         });
@@ -76,11 +82,15 @@ public final class ConfigurationDialog extends JDialog {
     }
 
     private void setupGraphics() {
-        this.setSize(300, 200);
+        this.setSize(300, 250);
 
         this.colorField.setRenderer(new ColorRenderer());
         this.colorField.setSelectedItem(Color.RED);
 
+        JLabel hostLabel = new JLabel("Host");
+        hostLabel.setHorizontalAlignment(JLabel.RIGHT);
+        JLabel portLabel = new JLabel("Port");
+        portLabel.setHorizontalAlignment(JLabel.RIGHT);
         JLabel dbnameLabel = new JLabel("Database");
         dbnameLabel.setHorizontalAlignment(JLabel.RIGHT);
         JLabel collnameLabel = new JLabel("Collection");
@@ -102,46 +112,70 @@ public final class ConfigurationDialog extends JDialog {
         constraints.gridy = 0;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
-        formPanel.add(dbnameLabel, constraints);
+        formPanel.add(hostLabel, constraints);
 
         constraints.gridx = 1;
         constraints.gridy = 0;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
-        formPanel.add(this.dbnameField, constraints);
+        formPanel.add(this.hostField, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 1;
+        constraints.weightx = labelWeightx;
+        constraints.insets = labelInsets;
+        formPanel.add(portLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        constraints.weightx = controlWeightx;
+        constraints.insets = controlInsets;
+        formPanel.add(this.portField, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.weightx = labelWeightx;
+        constraints.insets = labelInsets;
+        formPanel.add(dbnameLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 2;
+        constraints.weightx = controlWeightx;
+        constraints.insets = controlInsets;
+        formPanel.add(this.dbnameField, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 3;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(collnameLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 1;
+        constraints.gridy = 3;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.collnameField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 2;
+        constraints.gridy = 4;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(intervalLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 2;
+        constraints.gridy = 4;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.intervalField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 3;
+        constraints.gridy = 5;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(colorLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 3;
+        constraints.gridy = 5;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.colorField, constraints);

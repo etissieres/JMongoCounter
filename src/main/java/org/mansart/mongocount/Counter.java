@@ -3,13 +3,16 @@ package org.mansart.mongocount;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
-import org.mansart.mongocount.exception.MongoException;
 
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public final class Counter implements Configuration.Listener, Runnable {
-    private ArrayList<Listener> listeners = new ArrayList<Listener>();
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+    private ArrayList<Listener> listeners = new ArrayList<>();
     private MongoClient client = null;
     private Configuration configuration = null;
     private Thread thread = null;
@@ -19,27 +22,10 @@ public final class Counter implements Configuration.Listener, Runnable {
         this.configuration.addListener(this);
     }
 
-    public void connect() throws MongoException {
-        try {
-            this.client = new MongoClient("localhost");
-        } catch (UnknownHostException e) {
-            throw new MongoException("Unable to setup", e);
-        }
-    }
-
-    public void disconnect() {
-        if (this.client != null) this.client.close();
-    }
-
     public void start() {
-        if (!this.configuration.getDbname().isEmpty() &&
-            !this.configuration.getCollname().isEmpty() &&
-            this.configuration.getInterval() > 0) {
-
-            this.thread = new Thread(this);
-            this.thread.start();
-            this.notifyListenersOfCountStart();
-        }
+        this.thread = new Thread(this);
+        this.thread.start();
+        this.notifyListenersOfCountStart();
     }
 
     public void stop() {
@@ -83,18 +69,31 @@ public final class Counter implements Configuration.Listener, Runnable {
         }
     }
 
+    private void notifyListenersOfCountError() {
+        for (Listener listener : this.listeners) {
+            listener.onCountError();
+        }
+    }
+
     @Override
     public void run() {
-        DB db = this.client.getDB(this.configuration.getDbname());
-        DBCollection coll = db.getCollection(this.configuration.getCollname());
-        while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
-            long count = coll.count();
-            this.notifyListenersOfCount(count);
-            try {
+        try {
+            System.out.println(this.configuration.toString());
+            MongoClient client = new MongoClient(this.configuration.getHost(), this.configuration.getPort());
+            DB db = client.getDB(this.configuration.getDbname());
+            DBCollection coll = db.getCollection(this.configuration.getCollname());
+            while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
+                long count = coll.count();
+                System.out.println("[" + DATE_FORMAT.format(new Date()) + "] " + count);
+                this.notifyListenersOfCount(count);
                 Thread.sleep(this.configuration.getInterval() * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
+            if (this.client != null) this.client.close();
+        } catch (Exception e) {
+            this.stop();
+            this.notifyListenersOfCountError();
+            System.out.println("Processing error...");
+            e.printStackTrace();
         }
     }
 
@@ -102,5 +101,6 @@ public final class Counter implements Configuration.Listener, Runnable {
         public void onCountStart();
         public void onCountStop();
         public void onCount(long count);
+        public void onCountError();
     }
 }
