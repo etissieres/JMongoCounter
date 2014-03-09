@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public final class ConfigurationDialog extends JDialog {
+final class ConfigurationDialog extends JDialog {
     private static final Color[] COLORS = new Color[] {
         Color.BLACK,
         Color.BLUE,

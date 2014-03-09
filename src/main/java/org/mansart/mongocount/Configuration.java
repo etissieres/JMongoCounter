@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public final class Configuration {
-    private ArrayList<Listener> listeners = new ArrayList<>();
+    private final ArrayList<Listener> listeners = new ArrayList<>();
     private String host = "localhost";
     private int port = 27017;
     private String dbname = "";

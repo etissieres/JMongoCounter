@@ -4,7 +4,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 
-import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,8 +11,7 @@ import java.util.Date;
 
 public final class Counter implements Configuration.Listener, Runnable {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
-    private ArrayList<Listener> listeners = new ArrayList<>();
-    private MongoClient client = null;
+    private final ArrayList<Listener> listeners = new ArrayList<>();
     private Configuration configuration = null;
     private Thread thread = null;
 
@@ -88,7 +86,7 @@ public final class Counter implements Configuration.Listener, Runnable {
                 this.notifyListenersOfCount(count);
                 Thread.sleep(this.configuration.getInterval() * 1000);
             }
-            if (this.client != null) this.client.close();
+            client.close();
         } catch (Exception e) {
             this.stop();
             this.notifyListenersOfCountError();
