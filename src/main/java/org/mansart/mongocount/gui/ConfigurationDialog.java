@@ -36,13 +36,49 @@ public final class ConfigurationDialog extends JDialog {
         JLabel intervalLabel = new JLabel("Interval");
         intervalLabel.setHorizontalAlignment(JLabel.RIGHT);
 
-        JPanel formPanel = new JPanel(new GridLayout(3, 2));
-        formPanel.add(dbnameLabel);
-        formPanel.add(this.dbnameField);
-        formPanel.add(collnameLabel);
-        formPanel.add(this.collnameField);
-        formPanel.add(intervalLabel);
-        formPanel.add(this.intervalField);
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        double labelWeightx = 0.1;
+        double controlWeightx = 0.9;
+        Insets labelInsets = new Insets(0, 0, 0, 0);
+        Insets controlInsets = new Insets(0, 5, 0, 5);
+
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = labelWeightx;
+        constraints.insets = labelInsets;
+        formPanel.add(dbnameLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.weightx = controlWeightx;
+        constraints.insets = controlInsets;
+        formPanel.add(this.dbnameField, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = labelWeightx;
+        constraints.insets = labelInsets;
+        formPanel.add(collnameLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        constraints.weightx = controlWeightx;
+        constraints.insets = controlInsets;
+        formPanel.add(this.collnameField, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.weightx = labelWeightx;
+        constraints.insets = labelInsets;
+        formPanel.add(intervalLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 2;
+        constraints.weightx = controlWeightx;
+        constraints.insets = controlInsets;
+        formPanel.add(this.intervalField, constraints);
 
         JPanel controlsPanel = new JPanel(new FlowLayout());
         controlsPanel.add(this.cancelButton);
