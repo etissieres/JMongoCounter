@@ -29,7 +29,7 @@ public final class Application {
             public void run() {
                 Window window = new Window(configuration, counter);
                 JFrame frame = new JFrame("Mongo Counter");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frame.setLocationRelativeTo(null);
                 frame.setSize(900, 600);
                 frame.setContentPane(window);
