@@ -161,9 +161,11 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
 
     @Override
     public void onCount(final long count) {
+        final String title = this.configuration.getDbname() + "." + this.configuration.getCollname() + " : " + count;
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                Window.this.chart.setTitle(title);
                 Window.this.data.add(Window.this.data.getItemCount(), count);
             }
         });
