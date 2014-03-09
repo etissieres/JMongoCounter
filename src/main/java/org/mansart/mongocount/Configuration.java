@@ -1,5 +1,6 @@
 package org.mansart.mongocount;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public final class Configuration {
@@ -7,6 +8,7 @@ public final class Configuration {
     private String dbname = "";
     private String collname = "";
     private int interval = 1;
+    private Color color = Color.RED;
 
     public String getDbname() {
         return this.dbname;
@@ -20,10 +22,15 @@ public final class Configuration {
         return this.interval;
     }
 
-    public void udpate(String dbname, String collname, int interval) {
+    public Color getColor() {
+        return this.color;
+    }
+
+    public void udpate(String dbname, String collname, int interval, Color color) {
         this.dbname = dbname;
         this.collname = collname;
         this.interval = interval;
+        this.color = color;
         this.notifyListeners();
     }
 

@@ -43,49 +43,9 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
 
         this.configurationDialog = new ConfigurationDialog(configuration, this);
 
+        this.setupListeners();
         this.setupChart();
         this.setupGraphics();
-        this.setupListeners();
-    }
-
-    private void setupChart() {
-        this.data = new XYSeries("Counts");
-
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(data);
-
-        this.chart = ChartFactory.createXYLineChart(
-            "Mongo Counts",
-            "Ticks",
-            "Counts",
-            dataset
-        );
-        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-        renderer.setBaseShapesVisible(false);
-        renderer.setBaseSeriesVisibleInLegend(false);
-        this.chart.getXYPlot().setRenderer(renderer);
-    }
-
-    private void setupGraphics() {
-        JPanel controlsPanel = new JPanel();
-        controlsPanel.setBorder(BorderFactory.createCompoundBorder(
-            new EmptyBorder(5, 5, 5, 5),
-            new TitledBorder("Controls")));
-        controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.LINE_AXIS));
-        controlsPanel.add(this.configurationButton);
-        controlsPanel.add(Box.createHorizontalGlue());
-        controlsPanel.add(this.lifeButton);
-        controlsPanel.add(this.clearButton);
-        controlsPanel.add(this.saveButton);
-        controlsPanel.add(Box.createHorizontalGlue());
-        controlsPanel.add(this.quitButton);
-
-        this.chartPanel = new ChartPanel(this.chart);
-        this.chartPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
-
-        this.setLayout(new BorderLayout());
-        this.add(this.chartPanel, BorderLayout.CENTER);
-        this.add(controlsPanel, BorderLayout.SOUTH);
     }
 
     private void setupListeners() {
@@ -147,6 +107,46 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
         });
     }
 
+    private void setupChart() {
+        this.data = new XYSeries("Counts");
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(data);
+
+        this.chart = ChartFactory.createXYLineChart(
+            "Mongo Counts",
+            "Ticks",
+            "Counts",
+            dataset
+        );
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        renderer.setBaseShapesVisible(false);
+        renderer.setBaseSeriesVisibleInLegend(false);
+        this.chart.getXYPlot().setRenderer(renderer);
+    }
+
+    private void setupGraphics() {
+        JPanel controlsPanel = new JPanel();
+        controlsPanel.setBorder(BorderFactory.createCompoundBorder(
+            new EmptyBorder(5, 5, 5, 5),
+            new TitledBorder("Controls")));
+        controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.LINE_AXIS));
+        controlsPanel.add(this.configurationButton);
+        controlsPanel.add(Box.createHorizontalGlue());
+        controlsPanel.add(this.lifeButton);
+        controlsPanel.add(this.clearButton);
+        controlsPanel.add(this.saveButton);
+        controlsPanel.add(Box.createHorizontalGlue());
+        controlsPanel.add(this.quitButton);
+
+        this.chartPanel = new ChartPanel(this.chart);
+        this.chartPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
+
+        this.setLayout(new BorderLayout());
+        this.add(this.chartPanel, BorderLayout.CENTER);
+        this.add(controlsPanel, BorderLayout.SOUTH);
+    }
+
     @Override
     public void onConfigurationUpdate() {
         final String title = this.configuration.getDbname() + "." + this.configuration.getCollname();
@@ -155,6 +155,7 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
             public void run() {
                 Window.this.data.clear();
                 Window.this.chart.setTitle(title);
+                Window.this.chart.getXYPlot().getRenderer().setSeriesPaint(0, Window.this.configuration.getColor());
             }
         });
     }
