@@ -37,13 +37,17 @@ public final class Configuration {
     }
 
     public void udpate(String host, int port, String dbname, String collname, int interval, Color color) {
-        this.host = host;
-        this.port = port;
-        this.dbname = dbname;
-        this.collname = collname;
-        this.interval = interval;
-        this.color = color;
-        this.notifyListeners();
+        if (!host.isEmpty() && port > 0 && !dbname.isEmpty() && !collname.isEmpty() && interval > 0) {
+            this.host = host;
+            this.port = port;
+            this.dbname = dbname;
+            this.collname = collname;
+            this.interval = interval;
+            this.color = color;
+            this.notifyListenersOfUpdate();
+        } else {
+            this.notifyListenersOfError();
+        }
     }
 
     public void addListener(Listener listener) {
@@ -54,17 +58,24 @@ public final class Configuration {
         this.listeners.remove(listener);
     }
 
-    private void notifyListeners() {
+    private void notifyListenersOfUpdate() {
         for (Listener listener : this.listeners) {
             listener.onConfigurationUpdate();
         }
     }
 
-    public static interface Listener {
-        public void onConfigurationUpdate();
+    private void notifyListenersOfError() {
+        for (Listener listener : this.listeners) {
+            listener.onConfigurationError();
+        }
     }
 
     public String toString() {
         return this.dbname + "." + this.collname + "@" + this.host + ":" + this.port;
+    }
+
+    public static interface Listener {
+        public void onConfigurationUpdate();
+        public void onConfigurationError();
     }
 }

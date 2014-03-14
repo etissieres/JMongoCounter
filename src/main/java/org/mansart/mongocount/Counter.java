@@ -3,17 +3,15 @@ package org.mansart.mongocount;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
+import org.mansart.mongocount.util.HumanDate;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public final class Counter implements Configuration.Listener, Runnable {
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private final ArrayList<Listener> listeners = new ArrayList<>();
     private Configuration configuration = null;
     private Thread thread = null;
+    private long startTimestamp = System.currentTimeMillis();
 
     public Counter(Configuration configuration) {
         this.configuration = configuration;
@@ -38,7 +36,13 @@ public final class Counter implements Configuration.Listener, Runnable {
     @Override
     public void onConfigurationUpdate() {
         this.stop();
+        this.startTimestamp = System.currentTimeMillis();
         this.start();
+    }
+
+    @Override
+    public void onConfigurationError() {
+        this.stop();
     }
 
     public void addListener(Listener listener) {
@@ -61,9 +65,9 @@ public final class Counter implements Configuration.Listener, Runnable {
         }
     }
 
-    private void notifyListenersOfCount(long count) {
+    private void notifyListenersOfCount(long time, long count) {
         for (Listener listener : this.listeners) {
-            listener.onCount(count);
+            listener.onCount(time, count);
         }
     }
 
@@ -82,8 +86,9 @@ public final class Counter implements Configuration.Listener, Runnable {
             DBCollection coll = db.getCollection(this.configuration.getCollname());
             while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
                 long count = coll.count();
-                System.out.println("[" + DATE_FORMAT.format(new Date()) + "] " + count);
-                this.notifyListenersOfCount(count);
+                long time = System.currentTimeMillis() - this.startTimestamp;
+                System.out.println("[" + HumanDate.now() + "] " + count);
+                this.notifyListenersOfCount(time, count);
                 Thread.sleep(this.configuration.getInterval() * 1000);
             }
             client.close();
@@ -98,7 +103,7 @@ public final class Counter implements Configuration.Listener, Runnable {
     public static interface Listener {
         public void onCountStart();
         public void onCountStop();
-        public void onCount(long count);
+        public void onCount(long time, long count);
         public void onCountError();
     }
 }

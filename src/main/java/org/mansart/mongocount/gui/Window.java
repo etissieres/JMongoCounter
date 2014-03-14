@@ -115,13 +115,15 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
 
         this.chart = ChartFactory.createXYLineChart(
             "Mongo Counts",
-            "Ticks",
-            "Counts",
+            "Time (seconds)",
+            "Count",
             dataset
         );
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setBaseShapesVisible(false);
         renderer.setBaseSeriesVisibleInLegend(false);
+        //this.chart.getXYPlot().setDomainCrosshairVisible(true);
+        //this.chart.getXYPlot().setDomainCrosshairLockedOnData(true);
         this.chart.getXYPlot().setRenderer(renderer);
     }
 
@@ -153,9 +155,21 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                Window.this.data.clear();
                 Window.this.chart.setTitle(title);
                 Window.this.chart.getXYPlot().getRenderer().setSeriesPaint(0, Window.this.configuration.getColor());
+            }
+        });
+    }
+
+    @Override
+    public void onConfigurationError() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JOptionPane.showMessageDialog(Window.this,
+                    "Invalid configuration provided",
+                    "Configuration invalid",
+                    JOptionPane.ERROR_MESSAGE);
             }
         });
     }
@@ -165,6 +179,7 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                Window.this.data.clear();
                 Window.this.lifeButton.setText("Stop");
             }
         });
@@ -181,13 +196,13 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
     }
 
     @Override
-    public void onCount(final long count) {
+    public void onCount(final long time, final long count) {
         final String title = this.configuration.getDbname() + "." + this.configuration.getCollname() + " : " + count;
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 Window.this.chart.setTitle(title);
-                Window.this.data.add(Window.this.data.getItemCount(), count);
+                Window.this.data.add(time / 1000, count);
             }
         });
     }
