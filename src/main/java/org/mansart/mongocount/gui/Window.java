@@ -19,7 +19,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
-public final class Window extends JPanel implements Configuration.Listener, Counter.Listener {
+public final class Window extends JPanel {
     private Configuration configuration = null;
     private Counter counter = null;
     private XYSeries data = null;
@@ -37,9 +37,7 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
         super();
 
         this.configuration = configuration;
-        this.configuration.addListener(this);
         this.counter = counter;
-        this.counter.addListener(this);
 
         this.configurationDialog = new ConfigurationDialog(configuration, this);
 
@@ -49,6 +47,88 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
     }
 
     private void setupListeners() {
+        this.configuration.addListener(new Configuration.Listener() {
+
+            @Override
+            public void onUpdate() {
+                String dbname = Window.this.configuration.getDbname();
+                String collname = Window.this.configuration.getCollname();
+                final String title = dbname + "." + collname;
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Window.this.chart.setTitle(title);
+                        Color color = Window.this.configuration.getColor();
+                        Window.this.chart.getXYPlot().getRenderer().setSeriesPaint(0, color);
+                    }
+                });
+            }
+
+            @Override
+            public void onError() {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(Window.this,
+                            "Invalid configuration provided",
+                            "Configuration invalid",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+            }
+        });
+
+        this.counter.addListener(new Counter.Listener() {
+
+            @Override
+            public void onStart() {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Window.this.data.clear();
+                        Window.this.lifeButton.setText("Stop");
+                    }
+                });
+            }
+
+            @Override
+            public void onStop() {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Window.this.lifeButton.setText("Start");
+                    }
+                });
+            }
+
+            @Override
+            public void onCount(final long time, final long count) {
+                String dbname = Window.this.configuration.getDbname();
+                String collname = Window.this.configuration.getCollname();
+                final String title = dbname + "." + collname + " : " + count;
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Window.this.chart.setTitle(title);
+                        Window.this.data.add(time / 1000, count);
+                    }
+                });
+            }
+
+            @Override
+            public void onError() {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(Window.this,
+                            "An error occured while counting : " + Window.this.configuration,
+                            "Processing error",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+            }
+        });
+
         this.configurationButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -147,76 +227,5 @@ public final class Window extends JPanel implements Configuration.Listener, Coun
         this.setLayout(new BorderLayout());
         this.add(this.chartPanel, BorderLayout.CENTER);
         this.add(controlsPanel, BorderLayout.SOUTH);
-    }
-
-    @Override
-    public void onConfigurationUpdate() {
-        final String title = this.configuration.getDbname() + "." + this.configuration.getCollname();
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Window.this.chart.setTitle(title);
-                Window.this.chart.getXYPlot().getRenderer().setSeriesPaint(0, Window.this.configuration.getColor());
-            }
-        });
-    }
-
-    @Override
-    public void onConfigurationError() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                JOptionPane.showMessageDialog(Window.this,
-                    "Invalid configuration provided",
-                    "Configuration invalid",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        });
-    }
-
-    @Override
-    public void onCountStart() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Window.this.data.clear();
-                Window.this.lifeButton.setText("Stop");
-            }
-        });
-    }
-
-    @Override
-    public void onCountStop() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Window.this.lifeButton.setText("Start");
-            }
-        });
-    }
-
-    @Override
-    public void onCount(final long time, final long count) {
-        final String title = this.configuration.getDbname() + "." + this.configuration.getCollname() + " : " + count;
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Window.this.chart.setTitle(title);
-                Window.this.data.add(time / 1000, count);
-            }
-        });
-    }
-
-    @Override
-    public void onCountError() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                JOptionPane.showMessageDialog(Window.this,
-                    "An error occured while counting : " + Window.this.configuration,
-                    "Processing error",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        });
     }
 }

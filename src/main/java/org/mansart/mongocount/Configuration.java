@@ -60,13 +60,13 @@ public final class Configuration {
 
     private void notifyListenersOfUpdate() {
         for (Listener listener : this.listeners) {
-            listener.onConfigurationUpdate();
+            listener.onUpdate();
         }
     }
 
     private void notifyListenersOfError() {
         for (Listener listener : this.listeners) {
-            listener.onConfigurationError();
+            listener.onError();
         }
     }
 
@@ -75,7 +75,7 @@ public final class Configuration {
     }
 
     public static interface Listener {
-        public void onConfigurationUpdate();
-        public void onConfigurationError();
+        public void onUpdate();
+        public void onError();
     }
 }

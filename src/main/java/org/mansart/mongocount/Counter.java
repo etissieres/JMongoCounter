@@ -7,7 +7,7 @@ import org.mansart.mongocount.util.HumanDate;
 
 import java.util.ArrayList;
 
-public final class Counter implements Configuration.Listener, Runnable {
+public final class Counter implements Runnable {
     private final ArrayList<Listener> listeners = new ArrayList<>();
     private Configuration configuration = null;
     private Thread thread = null;
@@ -15,7 +15,24 @@ public final class Counter implements Configuration.Listener, Runnable {
 
     public Counter(Configuration configuration) {
         this.configuration = configuration;
-        this.configuration.addListener(this);
+        this.initListeners();
+    }
+
+    private void initListeners() {
+        this.configuration.addListener(new Configuration.Listener() {
+
+            @Override
+            public void onUpdate() {
+                Counter.this.stop();
+                Counter.this.startTimestamp = System.currentTimeMillis();
+                Counter.this.start();
+            }
+
+            @Override
+            public void onError() {
+                Counter.this.stop();
+            }
+        });
     }
 
     public void start() {
@@ -33,18 +50,6 @@ public final class Counter implements Configuration.Listener, Runnable {
         return this.thread != null && this.thread.isAlive();
     }
 
-    @Override
-    public void onConfigurationUpdate() {
-        this.stop();
-        this.startTimestamp = System.currentTimeMillis();
-        this.start();
-    }
-
-    @Override
-    public void onConfigurationError() {
-        this.stop();
-    }
-
     public void addListener(Listener listener) {
         this.listeners.add(listener);
     }
@@ -55,13 +60,13 @@ public final class Counter implements Configuration.Listener, Runnable {
 
     private void notifyListenersOfCountStart() {
         for (Listener listener : this.listeners) {
-            listener.onCountStart();
+            listener.onStart();
         }
     }
 
     private void notifyListenersOfCountStop() {
         for (Listener listener : this.listeners) {
-            listener.onCountStop();
+            listener.onStop();
         }
     }
 
@@ -73,7 +78,7 @@ public final class Counter implements Configuration.Listener, Runnable {
 
     private void notifyListenersOfCountError() {
         for (Listener listener : this.listeners) {
-            listener.onCountError();
+            listener.onError();
         }
     }
 
@@ -101,9 +106,9 @@ public final class Counter implements Configuration.Listener, Runnable {
     }
 
     public static interface Listener {
-        public void onCountStart();
-        public void onCountStop();
+        public void onStart();
+        public void onStop();
         public void onCount(long time, long count);
-        public void onCountError();
+        public void onError();
     }
 }
