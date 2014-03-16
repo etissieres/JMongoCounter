@@ -11,7 +11,6 @@ public final class Counter implements Runnable {
     private final ArrayList<Listener> listeners = new ArrayList<>();
     private Configuration configuration = null;
     private Thread thread = null;
-    private long startTimestamp = System.currentTimeMillis();
 
     public Counter(Configuration configuration) {
         this.configuration = configuration;
@@ -24,7 +23,6 @@ public final class Counter implements Runnable {
             @Override
             public void onUpdate() {
                 Counter.this.stop();
-                Counter.this.startTimestamp = System.currentTimeMillis();
                 Counter.this.start();
             }
 
@@ -70,9 +68,9 @@ public final class Counter implements Runnable {
         }
     }
 
-    private void notifyListenersOfCount(long time, long count) {
+    private void notifyListenersOfCount(long count) {
         for (Listener listener : this.listeners) {
-            listener.onCount(time, count);
+            listener.onCount(count);
         }
     }
 
@@ -91,9 +89,8 @@ public final class Counter implements Runnable {
             DBCollection coll = db.getCollection(this.configuration.getCollname());
             while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
                 long count = coll.count();
-                long time = System.currentTimeMillis() - this.startTimestamp;
                 System.out.println("[" + HumanDate.now() + "] " + count);
-                this.notifyListenersOfCount(time, count);
+                this.notifyListenersOfCount(count);
                 Thread.sleep(this.configuration.getInterval() * 1000);
             }
             client.close();
@@ -108,7 +105,7 @@ public final class Counter implements Runnable {
     public static interface Listener {
         public void onStart();
         public void onStop();
-        public void onCount(long time, long count);
+        public void onCount(long count);
         public void onError();
     }
 }

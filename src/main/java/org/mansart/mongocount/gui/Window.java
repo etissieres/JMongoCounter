@@ -1,12 +1,13 @@
 package org.mansart.mongocount.gui;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.time.*;
 import org.jfree.ui.ExtensionFileFilter;
 import org.mansart.mongocount.Configuration;
 import org.mansart.mongocount.Counter;
@@ -22,7 +23,7 @@ import java.io.IOException;
 public final class Window extends JPanel {
     private Configuration configuration = null;
     private Counter counter = null;
-    private XYSeries data = null;
+    private TimeSeries data = null;
 
     private JFreeChart chart = null;
     private ChartPanel chartPanel = null;
@@ -102,7 +103,7 @@ public final class Window extends JPanel {
             }
 
             @Override
-            public void onCount(final long time, final long count) {
+            public void onCount(final long count) {
                 String dbname = Window.this.configuration.getDbname();
                 String collname = Window.this.configuration.getCollname();
                 final String title = dbname + "." + collname + " : " + count;
@@ -110,7 +111,7 @@ public final class Window extends JPanel {
                     @Override
                     public void run() {
                         Window.this.chart.setTitle(title);
-                        Window.this.data.add(time / 1000, count);
+                        Window.this.data.add(new Millisecond(), count);
                     }
                 });
             }
@@ -188,23 +189,25 @@ public final class Window extends JPanel {
     }
 
     private void setupChart() {
-        this.data = new XYSeries("Counts");
+        this.data = new TimeSeries("Counts");
 
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(data);
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(this.data);
 
-        this.chart = ChartFactory.createXYLineChart(
-            "Mongo Counts",
-            "Time (seconds)",
-            "Count",
-            dataset
-        );
+        DateAxis domain = new DateAxis("Time");
+        domain.setAutoRange(true);
+        NumberAxis range = new NumberAxis("Count");
+
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setBaseShapesVisible(false);
         renderer.setBaseSeriesVisibleInLegend(false);
-        //this.chart.getXYPlot().setDomainCrosshairVisible(true);
-        //this.chart.getXYPlot().setDomainCrosshairLockedOnData(true);
-        this.chart.getXYPlot().setRenderer(renderer);
+
+        XYPlot plot = new XYPlot(dataset, domain, range, renderer);
+        plot.setDomainCrosshairVisible(true);
+        plot.setDomainCrosshairLockedOnData(false);
+        plot.setRangeCrosshairVisible(false);
+
+        this.chart = new JFreeChart("Mongo Counts", plot);
     }
 
     private void setupGraphics() {
