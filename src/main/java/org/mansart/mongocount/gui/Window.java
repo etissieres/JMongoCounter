@@ -222,7 +222,9 @@ public final class Window extends JPanel {
         controlsPanel.add(Box.createHorizontalGlue());
         controlsPanel.add(this.quitButton);
 
-        this.chartPanel = new ChartPanel(this.chart);
+        // fourth first booleans are for context menu : properties, save, print, zoom
+        // last boolean is for enabling tooltips
+        this.chartPanel = new ChartPanel(this.chart, false, false, false, true, false);
         this.chartPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
 
         this.setLayout(new BorderLayout());
