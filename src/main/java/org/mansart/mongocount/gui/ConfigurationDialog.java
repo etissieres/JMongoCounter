@@ -1,5 +1,8 @@
 package org.mansart.mongocount.gui;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
 import org.mansart.mongocount.Configuration;
 
 import javax.swing.*;
@@ -25,7 +28,7 @@ final class ConfigurationDialog extends JDialog {
     private JSpinner portField = new JSpinner();
     private JTextField dbnameField = new JTextField();
     private JTextField collnameField = new JTextField();
-    private JTextArea queryField = new JTextArea();
+    private RSyntaxTextArea queryField = new RSyntaxTextArea();
     private JSpinner intervalField = new JSpinner();
     private JComboBox<Color> colorField = new JComboBox<>(COLORS);
     private JButton cancelButton = new JButton("Cancel");
@@ -85,9 +88,12 @@ final class ConfigurationDialog extends JDialog {
     }
 
     private void setupGraphics() {
-        this.setSize(450, 300);
+        this.setSize(450, 350);
 
-        this.queryField.setRows(3);
+        this.queryField.setRows(5);
+        this.queryField.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
+        this.queryField.setTabsEmulated(true);
+        this.queryField.setTabSize(2);
 
         this.colorField.setRenderer(new ColorRenderer());
         this.colorField.setSelectedItem(Color.RED);
@@ -174,7 +180,7 @@ final class ConfigurationDialog extends JDialog {
         constraints.gridy = posy;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
-        formPanel.add(new JScrollPane(this.queryField), constraints);
+        formPanel.add(new RTextScrollPane(this.queryField), constraints);
 
         constraints.gridx = 0;
         constraints.gridy = ++posy;

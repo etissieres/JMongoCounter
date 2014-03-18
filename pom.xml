@@ -17,6 +17,7 @@
         <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
         <java.source.version>1.7</java.source.version>
         <java.target.version>1.7</java.target.version>
+        <rsyntaxtextarea.version>2.5.0</rsyntaxtextarea.version>
     </properties>
 
     <dependencies>
@@ -34,6 +35,11 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${json.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fifesoft</groupId>
+            <artifactId>rsyntaxtextarea</artifactId>
+            <version>${rsyntaxtextarea.version}</version>
         </dependency>
     </dependencies>
 
