@@ -58,6 +58,7 @@ public final class Window extends JPanel {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
+                        Window.this.data.clear();
                         Window.this.chart.setTitle(title);
                         Color color = Window.this.configuration.getColor();
                         Window.this.chart.getXYPlot().getRenderer().setSeriesPaint(0, color);
@@ -86,7 +87,6 @@ public final class Window extends JPanel {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        Window.this.data.clear();
                         Window.this.lifeButton.setText("Stop");
                     }
                 });
