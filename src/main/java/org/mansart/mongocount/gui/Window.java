@@ -203,11 +203,9 @@ public final class Window extends JPanel {
         renderer.setBaseSeriesVisibleInLegend(false);
 
         XYPlot plot = new XYPlot(dataset, domain, range, renderer);
-        plot.setDomainCrosshairVisible(true);
-        plot.setDomainCrosshairLockedOnData(false);
-        plot.setRangeCrosshairVisible(false);
 
         this.chart = new JFreeChart("Mongo Counts", plot);
+        ChartUtilities.applyCurrentTheme(this.chart);
     }
 
     private void setupGraphics() {

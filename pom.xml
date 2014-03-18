@@ -12,6 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jfreechart.version>1.0.17</jfreechart.version>
         <mongo-java-driver.version>2.11.4</mongo-java-driver.version>
+        <json.version>20140107</json.version>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
         <java.source.version>1.7</java.source.version>
@@ -28,6 +29,11 @@
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>${jfreechart.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
         </dependency>
     </dependencies>
 

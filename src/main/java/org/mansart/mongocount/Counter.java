@@ -2,7 +2,9 @@ package org.mansart.mongocount;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.util.JSON;
 import org.mansart.mongocount.util.HumanDate;
 
 import java.util.ArrayList;
@@ -88,7 +90,8 @@ public final class Counter implements Runnable {
             DB db = client.getDB(this.configuration.getDbname());
             DBCollection coll = db.getCollection(this.configuration.getCollname());
             while (this.thread != null && Thread.currentThread().getId() == this.thread.getId()) {
-                long count = coll.count();
+                String query = configuration.getQuery();
+                long count = query.isEmpty() ? coll.count() : coll.count((DBObject) JSON.parse(query));
                 System.out.println("[" + HumanDate.now() + "] " + count);
                 this.notifyListenersOfCount(count);
                 Thread.sleep(this.configuration.getInterval() * 1000);

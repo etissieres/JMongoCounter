@@ -25,6 +25,7 @@ final class ConfigurationDialog extends JDialog {
     private JSpinner portField = new JSpinner();
     private JTextField dbnameField = new JTextField();
     private JTextField collnameField = new JTextField();
+    private JTextArea queryField = new JTextArea();
     private JSpinner intervalField = new JSpinner();
     private JComboBox<Color> colorField = new JComboBox<>(COLORS);
     private JButton cancelButton = new JButton("Cancel");
@@ -47,6 +48,7 @@ final class ConfigurationDialog extends JDialog {
                 ConfigurationDialog.this.portField.setValue(ConfigurationDialog.this.configuration.getPort());
                 ConfigurationDialog.this.dbnameField.setText(ConfigurationDialog.this.configuration.getDbname());
                 ConfigurationDialog.this.collnameField.setText(ConfigurationDialog.this.configuration.getCollname());
+                ConfigurationDialog.this.queryField.setText(ConfigurationDialog.this.configuration.getQuery());
                 ConfigurationDialog.this.intervalField.setValue(ConfigurationDialog.this.configuration.getInterval());
             }
         });
@@ -66,9 +68,10 @@ final class ConfigurationDialog extends JDialog {
                 int port = (Integer) ConfigurationDialog.this.portField.getValue();
                 String dbname = ConfigurationDialog.this.dbnameField.getText();
                 String collname = ConfigurationDialog.this.collnameField.getText();
+                String query = ConfigurationDialog.this.queryField.getText();
                 int interval = (Integer) ConfigurationDialog.this.intervalField.getValue();
                 Color color = (Color) ConfigurationDialog.this.colorField.getSelectedItem();
-                ConfigurationDialog.this.configuration.udpate(host, port, dbname, collname, interval, color);
+                ConfigurationDialog.this.configuration.udpate(host, port, dbname, collname, query, interval, color);
                 ConfigurationDialog.this.setVisible(false);
             }
         });
@@ -82,7 +85,9 @@ final class ConfigurationDialog extends JDialog {
     }
 
     private void setupGraphics() {
-        this.setSize(300, 250);
+        this.setSize(450, 300);
+
+        this.queryField.setRows(3);
 
         this.colorField.setRenderer(new ColorRenderer());
         this.colorField.setSelectedItem(Color.RED);
@@ -95,6 +100,8 @@ final class ConfigurationDialog extends JDialog {
         dbnameLabel.setHorizontalAlignment(JLabel.RIGHT);
         JLabel collnameLabel = new JLabel("Collection");
         collnameLabel.setHorizontalAlignment(JLabel.RIGHT);
+        JLabel queryLabel = new JLabel("Query");
+        queryLabel.setHorizontalAlignment(JLabel.RIGHT);
         JLabel intervalLabel = new JLabel("Interval");
         intervalLabel.setHorizontalAlignment(JLabel.RIGHT);
         JLabel colorLabel = new JLabel("Color");
@@ -107,75 +114,88 @@ final class ConfigurationDialog extends JDialog {
         double controlWeightx = 0.9;
         Insets labelInsets = new Insets(0, 0, 0, 0);
         Insets controlInsets = new Insets(0, 5, 0, 5);
+        int posy = -1;
 
         constraints.gridx = 0;
-        constraints.gridy = 0;
+        constraints.gridy = ++posy;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(hostLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 0;
+        constraints.gridy = posy;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.hostField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 1;
+        constraints.gridy = ++posy;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(portLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 1;
+        constraints.gridy = posy;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.portField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 2;
+        constraints.gridy = ++posy;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(dbnameLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 2;
+        constraints.gridy = posy;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.dbnameField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 3;
+        constraints.gridy = ++posy;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(collnameLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 3;
+        constraints.gridy = posy;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.collnameField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 4;
+        constraints.gridy = ++posy;
+        constraints.weightx = labelWeightx;
+        constraints.insets = labelInsets;
+        formPanel.add(queryLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = posy;
+        constraints.weightx = controlWeightx;
+        constraints.insets = controlInsets;
+        formPanel.add(new JScrollPane(this.queryField), constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = ++posy;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(intervalLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 4;
+        constraints.gridy = posy;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.intervalField, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 5;
+        constraints.gridy = ++posy;
         constraints.weightx = labelWeightx;
         constraints.insets = labelInsets;
         formPanel.add(colorLabel, constraints);
 
         constraints.gridx = 1;
-        constraints.gridy = 5;
+        constraints.gridy = posy;
         constraints.weightx = controlWeightx;
         constraints.insets = controlInsets;
         formPanel.add(this.colorField, constraints);

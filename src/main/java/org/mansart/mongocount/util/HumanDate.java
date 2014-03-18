@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class HumanDate {
+public final class HumanDate {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
     public static String format(long timestamp) {
