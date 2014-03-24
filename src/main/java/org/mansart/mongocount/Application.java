@@ -24,21 +24,18 @@ public final class Application {
         }
 
         // Must be processed in EDT thread
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Window window = new Window(configuration, counter);
-                JFrame frame = new JFrame("Mongo Counter");
-                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-                frame.setSize(900, 600);
-                Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-                frame.setLocation(
-                    screen.width / 2 - frame.getSize().width / 2,
-                    screen.height / 2 - frame.getSize().height / 2
-                );
-                frame.setContentPane(window);
-                frame.setVisible(true);
-            }
+        SwingUtilities.invokeLater(() -> {
+            Window window = new Window(configuration, counter);
+            JFrame frame = new JFrame("Mongo Counter");
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setSize(900, 600);
+            Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+            frame.setLocation(
+                screen.width / 2 - frame.getSize().width / 2,
+                screen.height / 2 - frame.getSize().height / 2
+            );
+            frame.setContentPane(window);
+            frame.setVisible(true);
         });
     }
 }

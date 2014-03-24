@@ -81,15 +81,11 @@ public final class Configuration {
     }
 
     private void notifyListenersOfUpdate() {
-        for (Listener listener : this.listeners) {
-            listener.onUpdate();
-        }
+        this.listeners.forEach(Listener::onUpdate);
     }
 
     private void notifyListenersOfError() {
-        for (Listener listener : this.listeners) {
-            listener.onError();
-        }
+        this.listeners.forEach(Listener::onError);
     }
 
     public String toString() {

@@ -59,27 +59,19 @@ public final class Counter implements Runnable {
     }
 
     private void notifyListenersOfCountStart() {
-        for (Listener listener : this.listeners) {
-            listener.onStart();
-        }
+        this.listeners.forEach(Listener::onStart);
     }
 
     private void notifyListenersOfCountStop() {
-        for (Listener listener : this.listeners) {
-            listener.onStop();
-        }
+        this.listeners.forEach(Listener::onStop);
     }
 
     private void notifyListenersOfCount(long count) {
-        for (Listener listener : this.listeners) {
-            listener.onCount(count);
-        }
+        this.listeners.forEach((Listener listener) -> listener.onCount(count));
     }
 
     private void notifyListenersOfCountError() {
-        for (Listener listener : this.listeners) {
-            listener.onError();
-        }
+        this.listeners.forEach(Listener::onError);
     }
 
     @Override

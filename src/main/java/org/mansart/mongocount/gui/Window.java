@@ -15,8 +15,6 @@ import org.mansart.mongocount.Counter;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -55,28 +53,20 @@ public final class Window extends JPanel {
                 String dbname = Window.this.configuration.getDbname();
                 String collname = Window.this.configuration.getCollname();
                 final String title = dbname + "." + collname;
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Window.this.data.clear();
-                        Window.this.chart.setTitle(title);
-                        Color color = Window.this.configuration.getColor();
-                        Window.this.chart.getXYPlot().getRenderer().setSeriesPaint(0, color);
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    Window.this.data.clear();
+                    Window.this.chart.setTitle(title);
+                    Color color = Window.this.configuration.getColor();
+                    Window.this.chart.getXYPlot().getRenderer().setSeriesPaint(0, color);
                 });
             }
 
             @Override
             public void onError() {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(Window.this,
-                            "Invalid configuration provided",
-                            "Configuration invalid",
-                            JOptionPane.ERROR_MESSAGE);
-                    }
-                });
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Window.this,
+                    "Invalid configuration provided",
+                    "Configuration invalid",
+                    JOptionPane.ERROR_MESSAGE));
             }
         });
 
@@ -84,22 +74,12 @@ public final class Window extends JPanel {
 
             @Override
             public void onStart() {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Window.this.lifeButton.setText("Stop");
-                    }
-                });
+                SwingUtilities.invokeLater(() -> Window.this.lifeButton.setText("Stop"));
             }
 
             @Override
             public void onStop() {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Window.this.lifeButton.setText("Start");
-                    }
-                });
+                SwingUtilities.invokeLater(() -> Window.this.lifeButton.setText("Start"));
             }
 
             @Override
@@ -107,85 +87,53 @@ public final class Window extends JPanel {
                 String dbname = Window.this.configuration.getDbname();
                 String collname = Window.this.configuration.getCollname();
                 final String title = dbname + "." + collname + " : " + count;
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        Window.this.chart.setTitle(title);
-                        Window.this.data.add(new Millisecond(), count);
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    Window.this.chart.setTitle(title);
+                    Window.this.data.add(new Millisecond(), count);
                 });
             }
 
             @Override
             public void onError() {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(Window.this,
-                            "An error occured while counting : " + Window.this.configuration,
-                            "Processing error",
-                            JOptionPane.ERROR_MESSAGE);
-                    }
-                });
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(Window.this,
+                    "An error occured while counting : " + Window.this.configuration,
+                    "Processing error",
+                    JOptionPane.ERROR_MESSAGE));
             }
         });
 
-        this.configurationButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Window.this.configurationDialog.setLocationRelativeTo(Window.this);
-                Window.this.configurationDialog.setVisible(true);
-            }
+        this.configurationButton.addActionListener(e -> {
+            Window.this.configurationDialog.setLocationRelativeTo(Window.this);
+            Window.this.configurationDialog.setVisible(true);
         });
 
-        this.lifeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (Window.this.counter.isStarted()) {
-                            Window.this.counter.stop();
-                        } else {
-                            Window.this.counter.start();
-                        }
-                    }
-                }).start(); // Must not be processed in EDT thread
+        this.lifeButton.addActionListener(e -> new Thread(() -> {
+            if (Window.this.counter.isStarted()) {
+                Window.this.counter.stop();
+            } else {
+                Window.this.counter.start();
             }
-        });
+        }).start());
 
-        this.clearButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Window.this.data.clear();
-            }
-        });
+        this.clearButton.addActionListener(e -> Window.this.data.clear());
 
-        this.saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.addChoosableFileFilter(new ExtensionFileFilter("JPEG", ".jpg"));
-                int option = fileChooser.showSaveDialog(Window.this);
-                if (option == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    int width = Window.this.chartPanel.getWidth();
-                    int height = Window.this.chartPanel.getHeight();
-                    try {
-                        ChartUtilities.saveChartAsJPEG(file, Window.this.chart, width, height);
-                    } catch (IOException exception) {
-                        exception.printStackTrace();
-                    }
+        this.saveButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.addChoosableFileFilter(new ExtensionFileFilter("JPEG", ".jpg"));
+            int option = fileChooser.showSaveDialog(Window.this);
+            if (option == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                int width = Window.this.chartPanel.getWidth();
+                int height = Window.this.chartPanel.getHeight();
+                try {
+                    ChartUtilities.saveChartAsJPEG(file, Window.this.chart, width, height);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
                 }
             }
         });
 
-        this.quitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        this.quitButton.addActionListener(e -> System.exit(0));
     }
 
     private void setupChart() {

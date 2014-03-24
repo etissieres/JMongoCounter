@@ -6,7 +6,7 @@
 
     <groupId>org.mansart</groupId>
     <artifactId>JMongoCounter</artifactId>
-    <version>1.3</version>
+    <version>1.4</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,8 +15,8 @@
         <json.version>20140107</json.version>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
-        <java.source.version>1.7</java.source.version>
-        <java.target.version>1.7</java.target.version>
+        <java.source.version>1.8</java.source.version>
+        <java.target.version>1.8</java.target.version>
         <rsyntaxtextarea.version>2.5.0</rsyntaxtextarea.version>
     </properties>
 
